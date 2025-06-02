@@ -1,5 +1,5 @@
-# prisms-pf-candi
-Compile &amp; install dependencies for PRISMS-PF on linux-based systems.
+# prisms-candi
+Compile &amp; install dependencies for PRISMS Center softwares on linux-based systems.
 
 ## Quickstart
 The following commands download the latest stable release of PRISMS-PF and install the minimum prerequisites.
@@ -15,8 +15,8 @@ install Config::Tiny
 ```
 
 ```
-git clone https://github.com/landinjm/prisms-pf-candi.git
-cd prisms-pf-candi
+git clone https://github.com/landinjm/prisms-candi.git
+cd prisms-candi
 ./candi.pl
 ```
 
