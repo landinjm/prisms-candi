@@ -2,7 +2,7 @@
 
 #############################################################
 # Required packages
-PACKAGES="openblas openmpi p4est kokkos zlib"
+PACKAGES="openblas openmpi p4est kokkos zlib hdf5 vtk"
 
 #############################################################
 # Grab the date and start a global timer
@@ -38,6 +38,11 @@ quit_if_fail() {
     color_echo ${BAD} "Exit message:" $1
     exit ${STATUS}
   fi
+}
+
+# Shorten directory with ~
+shorten_dir() {
+  echo ${1/#$HOME\//~\/}
 }
 
 #############################################################
@@ -161,6 +166,7 @@ unset PREFIX
 
 # Set other paths
 SRC_PATH=${PREFIX_PATH}/tmp/src
+UNPACK_PATH=${PREFIX_PATH}/tmp/unpack
 BUILD_PATH=${PREFIX_PATH}/tmp/build
 INSTALL_PATH=${PREFIX_PATH}
 
@@ -173,10 +179,14 @@ fi
 
 #############################################################
 # Check for various dependencies
+
+# Check for git
 if ! [ -x "$(command -v git)" ]; then
   color_echo ${BAD} "Make sure git is installed and in path."
   exit 1
 fi
+
+# Check for spack and spack module system
 if ! command -v spack >/dev/null 2>&1 && [ $USING_SPACK == "ON" ]; then
   color_echo ${BAD} "Make sure spack is installed and in path."
   exit 1
@@ -185,8 +195,17 @@ if ! command -v module >/dev/null 2>&1 && [ $USING_SPACK == "ON" ]; then
   color_echo ${BAD} "Make sure spack's module system has been setup and in path."
   exit 1
 fi
-if ! command -v wget >/dev/null 2>&1 && [ $USING_SPACK != "ON" ]; then
-  color_echo ${BAD} "Please make sure wget is installed."
+
+# Check the download tool
+DOWNLOADERS=""
+if builtin command -v curl > /dev/null && [ $USING_SPACK != "ON" ]; then
+  DOWNLOADERS="${DOWNLOADERS} curl"
+fi
+if builtin command -v wget > /dev/null && [ $USING_SPACK != "ON" ]; then
+  DOWNLOADERS="${DOWNLOADERS} wget"
+fi
+if [ -z "$DOWNLOADERS" ]; then
+  color_echo ${BAD} "Please make sure curl or wget is installed."
   exit 1
 fi
 
@@ -207,38 +226,6 @@ install_compilers() {
     spack unload --all
     color_echo ${GOOD} "Installed $COMPILER_TYPE@$COMPILER_VERSION"
   fi
-}
-
-fix_clang_compilers() {
-  # In spack, the clang compiler does not come with f77 or fc compilers.
-  # Instead we need to find and use the gfortran compiler
-
-  # Make sure gfortran is installed
-  if ! command -v gfortran >/dev/null 2>&1; then
-    color_echo ${BAD} "gfortran is not installed. Please install it before proceeding."
-    exit 1
-  fi
-
-  # Grab gfortran path
-  GFORTRAN_PATH=$(which gfortran)
-
-  # Check that spack is installed in the usual location
-  SPACK_COMPILER_YAML="$HOME/.spack/linux/compilers.yaml"
-  if [ ! -f "$SPACK_COMPILER_YAML" ]; then
-    echo "Error: Spack compilers.yaml not found at $SPACK_COMPILER_YAML"
-    exit 1
-  fi
-
-  # Backup the original compilers.yaml
-  cp "$SPACK_COMPILER_YAML" "${SPACK_COMPILER_YAML}.bak"
-  echo "Backup created at ${SPACK_COMPILER_YAML}.bak"
-
-  # Update f77 and fc fields in compilers.yaml
-  awk -v gfortran_path="$GFORTRAN_PATH" '
-  /f77: null/ { sub("null", gfortran_path) }
-  /fc: null/ { sub("null", gfortran_path) }
-  { print }
-' "$SPACK_COMPILER_YAML" >"${SPACK_COMPILER_YAML}.tmp" && mv "${SPACK_COMPILER_YAML}.tmp" "$SPACK_COMPILER_YAML"
 }
 
 spack_install_dealii() {
@@ -336,6 +323,8 @@ spack_install_dealii() {
       P4EST_DIR=$(spack location -i $(spack find -H p4est%${COMPILER_TYPE}@${COMPILER_VERSION} | head -n 1))
       KOKKOS_DIR=$(spack location -i $(spack find -H kokkos%${COMPILER_TYPE}@${COMPILER_VERSION} | head -n 1))
       ZLIB_DIR=$(spack location -i $(spack find -H zlib%${COMPILER_TYPE}@${COMPILER_VERSION} | head -n 1))
+      HDF5_DIR=$(spack location -i $(spack find -H hdf5%${COMPILER_TYPE}@${COMPILER_VERSION} | head -n 1))
+      VTK_DIR=$(spack location -i $(spack find -H vtk%${COMPILER_TYPE}@${COMPILER_VERSION} | head -n 1))
       if [[ " ${PACKAGES[@]} " =~ " gsl " ]]; then
         GSL_DIR=$(spack location -i $(spack find -H gsl%${COMPILER_TYPE}@${COMPILER_VERSION} | head -n 1))
       fi
@@ -398,6 +387,10 @@ spack_install_dealii() {
     add_cmake_flag "KOKKOS_DIR" "$KOKKOS_DIR"
     add_cmake_flag "DEAL_II_WITH_ZLIB" "ON"
     add_cmake_flag "ZLIB_DIR" "$ZLIB_DIR"
+    add_cmake_flag "DEAL_II_WITH_HDF5" "ON"
+    add_cmake_flag "HDF5_DIR" "$HDF5_DIR"
+    add_cmake_flag "DEAL_II_WITH_VTK" "ON"
+    add_cmake_flag "VTK_DIR" "$VTK_DIR"
 
     # Optional dependencies
     if [[ " ${PACKAGES[@]} " =~ " gsl " ]]; then
@@ -440,6 +433,8 @@ spack_install_dealii() {
       P4EST_MODULE=$(spack find --format "{name}/{version}-${COMPILER_TYPE}-${COMPILER_VERSION}" p4est | head -n 1)
       KOKKOS_MODULE=$(spack find --format "{name}/{version}-${COMPILER_TYPE}-${COMPILER_VERSION}" kokkos | head -n 1)
       ZLIB_MODULE=$(spack find --format "{name}/{version}-${COMPILER_TYPE}-${COMPILER_VERSION}" zlib | head -n 1)
+      HDF5_MODULE=$(spack find --format "{name}/{version}-${COMPILER_TYPE}-${COMPILER_VERSION}" hdf5 | head -n 1)
+      VTK_MODULE=$(spack find --format "{name}/{version}-${COMPILER_TYPE}-${COMPILER_VERSION}" vtk | head -n 1)
       if [[ " ${PACKAGES[@]} " =~ " gsl " ]]; then
         GSL_MODULE=$(spack find --format "{name}/{version}-${COMPILER_TYPE}-${COMPILER_VERSION}" gsl | head -n 1)
       fi
@@ -474,6 +469,12 @@ spack_install_dealii() {
   end
   if not (isloaded("$ZLIB_MODULE")) then
       load("$ZLIB_MODULE")
+  end
+  if not (isloaded("$HDF5_MODULE")) then
+      load("$HDF5_MODULE")
+  end
+  if not (isloaded("$VTK_MODULE")) then
+      load("$VTK_MODULE")
   end
 EOF
 
@@ -682,11 +683,6 @@ if [ $USING_SPACK == "ON" ]; then
 
   # Install compilers with spack
   install_compilers
-
-  # Fix the compilers if needed
-  if [ "$COMPILER_TYPE" == "llvm" ]; then
-    fix_clang_compilers
-  fi
 
   # Install deal.II and other dependencies with the provided compilers
   spack_install_dealii
