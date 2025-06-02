@@ -56,6 +56,27 @@ sub version_greater_equal {
     }
 }
 
+# Check if a minor version is less than another version
+#   Example usage:
+#     if ( version_minor_less_than( $version1, $version2 ) ) {
+#       print "Version 1 is less than version 2\n";
+#     }
+sub version_minor_less_than {
+    my ( $version1, $version2 ) = @_;
+    my ( $major1, $minor1, $patch1 ) = decompose_version($version1);
+    my ( $major2, $minor2, $patch2 ) = decompose_version($version2);
+
+    if ( $major1 < $major2 ) {
+        return 1;
+    }
+    elsif ( $major1 == $major2 && $minor1 <= $minor2 ) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
 # Shorten directory with ~
 sub shorten_dir {
     my $dir = shift;

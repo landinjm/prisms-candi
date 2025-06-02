@@ -7,6 +7,7 @@ use Getopt::Long qw(GetOptions);
 # Load our modules
 use lib 'src';
 use utilities;
+use prisms_versioning_requirements;
 
 #############################################################
 # Start a timer
@@ -70,6 +71,71 @@ my $config = Config::Tiny->read($config_file);
 if ( !$config ) {
     utilities::color_print(
         "Error: Failed to read config file: " . Config::Tiny->errstr(), "bad" );
+    exit 1;
+}
+
+#############################################################
+# Some checks for the config file
+
+# Check that certain configs are ON or OFF
+utilities::check_config_value( "prisms_pf",
+    $config->{prisms_center_software}->{prisms_pf} );
+utilities::check_config_value( "prisms_plasticity",
+    $config->{prisms_center_software}->{prisms_plasticity} );
+utilities::check_config_value( "git",   $config->{required_packages}->{git} );
+utilities::check_config_value( "cmake", $config->{required_packages}->{cmake} );
+utilities::check_config_value( "zlib",  $config->{required_packages}->{zlib} );
+utilities::check_config_value( "boost", $config->{required_packages}->{boost} );
+utilities::check_config_value( "openblas",
+    $config->{required_packages}->{openblas} );
+utilities::check_config_value( "openmpi",
+    $config->{required_packages}->{openmpi} );
+utilities::check_config_value( "gsl",  $config->{optional_packages}->{gsl} );
+utilities::check_config_value( "hdf5", $config->{optional_packages}->{hdf5} );
+utilities::check_config_value( "sundials",
+    $config->{optional_packages}->{sundials} );
+utilities::check_config_value( "caliper",
+    $config->{optional_packages}->{caliper} );
+utilities::check_config_value( "spack", $config->{spack}->{full} );
+utilities::check_config_value( "spack", $config->{spack}->{partial} );
+utilities::check_config_value( "build_examples",
+    $config->{'deal.II'}->{build_examples} );
+utilities::check_config_value( "build_cuda", $config->{cuda}->{build_cuda} );
+utilities::check_config_value( "enable_native_optimizations",
+    $config->{misc_configs}->{enable_native_optimizations} );
+utilities::check_config_value( "enable_64bit_indices",
+    $config->{misc_configs}->{enable_64bit_indices} );
+
+# TODO sanitize the other inputs
+
+# Versioning checks
+if (
+    !prisms_versioning_requirements::dealii_version_is_supported(
+        $config->{'deal.II'}->{version}, "prisms_pf",
+        $config->{prisms_center_software}->{prisms_pf_version}
+    )
+    && $config->{prisms_center_software}->{prisms_pf} eq "ON"
+  )
+{
+    utilities::color_print(
+"deal.II v$config->{'deal.II'}->{version} is not supported by PRISMS-PF $config->{prisms_center_software}->{prisms_pf_version}.",
+        "bad"
+    );
+    exit 1;
+}
+if (
+    !prisms_versioning_requirements::dealii_version_is_supported(
+        $config->{'deal.II'}->{version},
+        "prisms_plasticity",
+        $config->{prisms_center_software}->{prisms_plasticity_version}
+    )
+    && $config->{prisms_center_software}->{prisms_plasticity} eq "ON"
+  )
+{
+    utilities::color_print(
+"deal.II v$config->{'deal.II'}->{version} is not supported by PRISMS-Plasticity $config->{prisms_center_software}->{prisms_plasticity_version}.",
+        "bad"
+    );
     exit 1;
 }
 
