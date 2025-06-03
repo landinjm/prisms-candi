@@ -141,6 +141,7 @@ if (
 
 #############################################################
 # Packages management
+my @packages_to_install = ();
 {
     # Required packages that are often pre-installed. Turning these ON
     # will install them from source.
@@ -152,12 +153,38 @@ if (
       ( "openblas", "openmpi", "p4est", "kokkos", "vtk", "zlib" );
 
     # Required packages for PRISMS-PLASTICITY
-    my @plasticity_packages =
+    my @prisms_plasticity_packages =
       ( "openblas", "openmpi", "p4est", "kokkos", "petsc", "hdf5", "zlib" );
 
     # Optional packages
     my @optional_prisms_pf_packages = ( "gsl", "hdf5", "sundials", "caliper" );
+
+# Look through each of these packages and add it to the package list if it is on.
+    foreach my $pkg (@required_packages) {
+        if ( $config->{required_packages}->{$pkg} eq "ON" ) {
+            push @packages_to_install, $pkg;
+        }
+    }
+    foreach my $pkg (@prisms_pf_packages) {
+        if ( $config->{prisms_center_software}->{prisms_pf} eq "ON" ) {
+            push @packages_to_install, $pkg;
+        }
+    }
+    foreach my $pkg (@prisms_plasticity_packages) {
+        if ( $config->{prisms_center_software}->{prisms_plasticity} eq "ON" ) {
+            push @packages_to_install, $pkg;
+        }
+    }
+    foreach my $pkg (@optional_prisms_pf_packages) {
+        if ( $config->{optional_packages}->{$pkg} eq "ON" ) {
+            push @packages_to_install, $pkg;
+        }
+    }
+
 }
+
+my $packages = join( ", ", @packages_to_install );
+utilities::color_print( "Preparing to install $packages", "info" );
 
 #############################################################
 # Print the time taken
