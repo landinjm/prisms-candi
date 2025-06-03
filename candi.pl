@@ -160,24 +160,25 @@ my @packages_to_install = ();
     my @optional_prisms_pf_packages = ( "gsl", "hdf5", "sundials", "caliper" );
 
 # Look through each of these packages and add it to the package list if it is on.
+    my %seen_packages;
     foreach my $pkg (@required_packages) {
         if ( $config->{required_packages}->{$pkg} eq "ON" ) {
-            push @packages_to_install, $pkg;
+            push @packages_to_install, $pkg unless $seen_packages{$pkg}++;
         }
     }
     foreach my $pkg (@prisms_pf_packages) {
         if ( $config->{prisms_center_software}->{prisms_pf} eq "ON" ) {
-            push @packages_to_install, $pkg;
+            push @packages_to_install, $pkg unless $seen_packages{$pkg}++;
         }
     }
     foreach my $pkg (@prisms_plasticity_packages) {
         if ( $config->{prisms_center_software}->{prisms_plasticity} eq "ON" ) {
-            push @packages_to_install, $pkg;
+            push @packages_to_install, $pkg unless $seen_packages{$pkg}++;
         }
     }
     foreach my $pkg (@optional_prisms_pf_packages) {
         if ( $config->{optional_packages}->{$pkg} eq "ON" ) {
-            push @packages_to_install, $pkg;
+            push @packages_to_install, $pkg unless $seen_packages{$pkg}++;
         }
     }
 
