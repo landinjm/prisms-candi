@@ -3,6 +3,7 @@ use warnings;
 use strict;
 use Config::Tiny;
 use Getopt::Long qw(GetOptions);
+use File::Path   qw( make_path rmtree );
 
 # Load our modules
 use lib 'src';
@@ -82,6 +83,8 @@ utilities::check_config_value( "prisms_pf",
     $config->{prisms_center_software}->{prisms_pf} );
 utilities::check_config_value( "prisms_plasticity",
     $config->{prisms_center_software}->{prisms_plasticity} );
+utilities::check_config_value( "clean_build",
+    $config->{prisms_center_software}->{clean_build} );
 utilities::check_config_value( "git",   $config->{required_packages}->{git} );
 utilities::check_config_value( "cmake", $config->{required_packages}->{cmake} );
 utilities::check_config_value( "zlib",  $config->{required_packages}->{zlib} );
@@ -168,7 +171,7 @@ if ( $architecture eq "unknown" ) {
 }
 
 #############################################################
-# Packages management
+# Package management
 my @packages_to_install = ();
 {
     # Required packages that are often pre-installed. Turning these ON
@@ -212,6 +215,88 @@ my @packages_to_install = ();
 
 my $packages = join( ", ", @packages_to_install );
 utilities::color_print( "Preparing to install $packages", "info" );
+
+#############################################################
+# Check the compiler
+utilities::color_print( "\nChecking the compiler", "info" );
+
+# Check and set CC if not defined
+if ( !defined $ENV{CC} ) {
+    my $mpicc = `which mpicc 2>/dev/null`;
+    chomp($mpicc);
+    if ($mpicc) {
+        utilities::color_print( "CC variable not set, but default mpicc found.",
+            "warn" );
+        $ENV{CC} = 'mpicc';
+    }
+}
+
+# Check and set CXX if not defined
+if ( !defined $ENV{CXX} ) {
+    my $mpicxx = `which mpicxx 2>/dev/null`;
+    chomp($mpicxx);
+    if ($mpicxx) {
+        utilities::color_print(
+            "CXX variable not set, but default mpicxx found.", "warn" );
+        $ENV{CXX} = 'mpicxx';
+    }
+}
+
+# Check and set FC if not defined
+if ( !defined $ENV{FC} ) {
+    my $mpif90 = `which mpif90 2>/dev/null`;
+    chomp($mpif90);
+    if ($mpif90) {
+        utilities::color_print(
+            "FC variable not set, but default mpif90 found.", "warn" );
+        $ENV{FC} = 'mpif90';
+    }
+}
+
+# Check and set FF if not defined
+if ( !defined $ENV{FF} ) {
+    my $mpif77 = `which mpif77 2>/dev/null`;
+    chomp($mpif77);
+    if ($mpif77) {
+        utilities::color_print(
+            "FF variable not set, but default mpif77 found.", "warn" );
+        $ENV{FF} = 'mpif77';
+    }
+}
+
+# Check that we have all compilers
+my @compilers = ( "CC", "CXX", "FC", "FF" );
+foreach my $compiler (@compilers) {
+    if ( !defined $ENV{$compiler} ) {
+        utilities::color_print( "Error: $compiler is not set.", "bad" );
+        exit 1;
+    }
+}
+
+# Get the compiler paths
+$ENV{CC_PATH}  = `which $ENV{CC} 2>/dev/null`;
+$ENV{CXX_PATH} = `which $ENV{CXX} 2>/dev/null`;
+$ENV{FC_PATH}  = `which $ENV{FC} 2>/dev/null`;
+$ENV{FF_PATH}  = `which $ENV{FF} 2>/dev/null`;
+
+# Print compiler information
+utilities::color_print( "CC: $ENV{CC} at $ENV{CC_PATH}",    "info" );
+utilities::color_print( "CXX: $ENV{CXX} at $ENV{CXX_PATH}", "info" );
+utilities::color_print( "FC: $ENV{FC} at $ENV{FC_PATH}",    "info" );
+utilities::color_print( "FF: $ENV{FF} at $ENV{FF_PATH}",    "info" );
+
+#############################################################
+# Clean up the old installation
+if ( $config->{prisms_center_software}->{clean_build} eq "ON" ) {
+    utilities::color_print( "\nCleaning up the old installation", "info" );
+    rmtree("$prefix/tmp");
+}
+
+# Create the necessary directories
+make_path("$prefix/tmp");
+make_path("$prefix/tmp/src");
+make_path("$prefix/tmp/unpack");
+make_path("$prefix/tmp/build");
 
 #############################################################
 # Print the time taken
