@@ -1,5 +1,0 @@
-VERSION=2.8
-
-install() {
-  color_echo ${INFO} "Installing GSL version $VERSION"
-}

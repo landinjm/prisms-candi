@@ -54,6 +54,7 @@ if ( !utilities::is_positive_integer($jobs) ) {
 }
 
 # Set the other paths
+my $candi_path   = 'pwd';
 my $src_path     = "$prefix/tmp/src";
 my $unpack_path  = "$prefix/tmp/unpack";
 my $build_path   = "$prefix/tmp/build";
@@ -288,15 +289,32 @@ utilities::color_print( "FF: $ENV{FF} at $ENV{FF_PATH}",    "info" );
 #############################################################
 # Clean up the old installation
 if ( $config->{prisms_center_software}->{clean_build} eq "ON" ) {
-    utilities::color_print( "\nCleaning up the old installation", "info" );
+    utilities::color_print( "Cleaning up the old installation", "info" );
     rmtree("$prefix/tmp");
 }
 
 # Create the necessary directories
+make_path("$install_path");
 make_path("$prefix/tmp");
-make_path("$prefix/tmp/src");
-make_path("$prefix/tmp/unpack");
-make_path("$prefix/tmp/build");
+make_path("$src_path");
+make_path("$unpack_path");
+make_path("$build_path");
+
+#############################################################
+# Begin installing the packages
+for my $pkg (@packages_to_install) {
+
+    # Navigate back to directory where we started
+    chdir($candi_path);
+
+    # Check that there is a package file for this package
+    my $package_file = "src/packages/$pkg.pm";
+    if ( !utilities::file_exists($package_file) ) {
+        utilities::color_print( "Error: No package file found for $pkg",
+            "bad" );
+        exit 1;
+    }
+}
 
 #############################################################
 # Print the time taken

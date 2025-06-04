@@ -1,5 +1,0 @@
-VERSION=11.8.0
-
-install() {
-  color_echo ${INFO} "Installing CUDA version $VERSION"
-}

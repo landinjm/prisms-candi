@@ -1,5 +1,0 @@
-VERSION=1.14.5
-
-install() {
-  color_echo ${INFO} "Installing HDF5 version $VERSION"
-}

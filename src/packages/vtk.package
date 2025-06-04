@@ -1,5 +1,0 @@
-VERSION=9.4.1
-
-install() {
-  color_echo ${INFO} "Installing VTK version $VERSION"
-}
