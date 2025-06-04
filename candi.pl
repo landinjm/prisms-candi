@@ -9,6 +9,7 @@ use File::Path   qw( make_path rmtree );
 use lib 'src';
 use utilities;
 use prisms_versioning_requirements;
+use package_manager;
 
 #############################################################
 # Start a timer
@@ -305,6 +306,12 @@ $ENV{CXX_PATH} = `which $ENV{CXX} 2>/dev/null`;
 $ENV{FC_PATH}  = `which $ENV{FC} 2>/dev/null`;
 $ENV{FF_PATH}  = `which $ENV{FF} 2>/dev/null`;
 
+# Remove the trailing newline
+chomp( $ENV{CC_PATH} );
+chomp( $ENV{CXX_PATH} );
+chomp( $ENV{FC_PATH} );
+chomp( $ENV{FF_PATH} );
+
 # Print compiler information
 utilities::color_print( "CC: $ENV{CC} at $ENV{CC_PATH}",    "info" );
 utilities::color_print( "CXX: $ENV{CXX} at $ENV{CXX_PATH}", "info" );
@@ -327,11 +334,25 @@ make_path("$build_path");
 
 #############################################################
 # Begin installing the packages
+
+# Initialize the package manager
+package_manager::init( $src_path, $unpack_path, $build_path, $install_path );
 for my $pkg (@packages_to_install) {
 
     # Navigate back to directory where we started
     chdir($candi_path);
 
+    # Fetch the package
+    package_manager::fetch_package($pkg);
+
+    # Unpack the package
+    package_manager::unpack_package($pkg);
+
+    # Configure the package
+    package_manager::configure_package($pkg);
+
+    # Build the package
+    package_manager::build_package($pkg);
 }
 
 #############################################################

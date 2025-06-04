@@ -8,6 +8,10 @@ use utilities;
 
 our $PRIORITY = 6;
 
+sub fetch { }
+
+sub unpack { }
+
 sub configure { }
 
 sub build { }
