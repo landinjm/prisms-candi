@@ -182,10 +182,11 @@ my @packages_to_install = ();
       ( "git", "cmake", "zlib", "boost", "openblas", "openmpi" );
 
     # Other required packages for PRISMS-PF
-    my @prisms_pf_packages = ( "p4est", "kokkos", "vtk" );
+    my @prisms_pf_packages = ( "p4est", "kokkos", "vtk", "dealii" );
 
     # Other required packages for PRISMS-PLASTICITY
-    my @prisms_plasticity_packages = ( "p4est", "kokkos", "petsc", "hdf5" );
+    my @prisms_plasticity_packages =
+      ( "p4est", "kokkos", "petsc", "hdf5", "dealii" );
 
     # Optional packages
     my @optional_prisms_pf_packages = ( "gsl", "hdf5", "sundials", "caliper" );
@@ -321,7 +322,7 @@ utilities::color_print( "FF: $ENV{FF} at $ENV{FF_PATH}",    "info" );
 #############################################################
 # Clean up the old installation
 if ( $config->{prisms_center_software}->{clean_build} eq "ON" ) {
-    utilities::color_print( "Cleaning up the old installation", "info" );
+    utilities::color_print( "Cleaning up the old installation\n", "info" );
     rmtree("$prefix/tmp");
 }
 

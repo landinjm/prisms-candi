@@ -11,6 +11,16 @@ our $unpack_path;
 our $build_path;
 our $install_path;
 
+# Helper function to safely access package variables
+sub get_package_var {
+    my ( $pkg, $var_name ) = @_;
+    my $package_name = "packages::$pkg";
+    no strict 'refs';
+    my $value = ${"${package_name}::$var_name"};
+    use strict 'refs';
+    return $value;
+}
+
 # Initialize the package manager with paths
 sub init {
     my ( $src, $unpack, $build, $install ) = @_;
@@ -26,12 +36,13 @@ sub fetch_package {
 
     # Load the package module
     my $package_file = "src/packages/$pkg.pm";
-    if ( !utilities::file_exists($package_file) ) {
-        utilities::color_print( "Error: No package file found for $pkg",
-            "bad" );
-        exit 1;
-    }
     require $package_file;
+
+    # Get package information
+    my $name    = get_package_var( $pkg, 'NAME' )    || $pkg;
+    my $version = get_package_var( $pkg, 'VERSION' ) || "unknown";
+
+    utilities::color_print( "Fetching $name $version...", "info" );
 
     # Call the package's fetch function
     my $package_name = "packages::$pkg";
@@ -90,3 +101,4 @@ sub build_package {
 }
 
 1;
+
