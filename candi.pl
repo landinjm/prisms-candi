@@ -214,6 +214,31 @@ my @packages_to_install = ();
 
 }
 
+# Sort the packages
+my %package_priorities;
+foreach my $pkg (@packages_to_install) {
+    my $package_file = "src/packages/$pkg.pm";
+    if ( !utilities::file_exists($package_file) ) {
+        utilities::color_print( "Error: No package file found for $pkg",
+            "bad" );
+        exit 1;
+    }
+
+    # Load the package module to get its priority
+    require $package_file;
+    my $package_name = "packages::$pkg";
+    no strict 'refs';
+
+    # Default to low priority if not specified
+    $package_priorities{$pkg} = ${"${package_name}::PRIORITY"} || 999;
+    use strict 'refs';
+}
+
+# Sort packages by priority (lower number = higher priority)
+@packages_to_install =
+  sort { $package_priorities{$a} <=> $package_priorities{$b} }
+  @packages_to_install;
+
 my $packages = join( ", ", @packages_to_install );
 utilities::color_print( "Preparing to install $packages", "info" );
 
@@ -307,13 +332,6 @@ for my $pkg (@packages_to_install) {
     # Navigate back to directory where we started
     chdir($candi_path);
 
-    # Check that there is a package file for this package
-    my $package_file = "src/packages/$pkg.pm";
-    if ( !utilities::file_exists($package_file) ) {
-        utilities::color_print( "Error: No package file found for $pkg",
-            "bad" );
-        exit 1;
-    }
 }
 
 #############################################################
