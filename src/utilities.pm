@@ -107,4 +107,49 @@ sub is_positive_integer {
     return $value =~ /^\d+$/ && $value > 0;
 }
 
+# Check if wget and curl are installed
+sub check_download_tools {
+    my @download_tools = ();
+    my $curl_path      = `which curl`;
+    chomp $curl_path;
+    if ( $curl_path ne "" ) {
+        push @download_tools, "curl";
+    }
+    my $wget_path = `which wget`;
+    chomp $wget_path;
+    if ( $wget_path ne "" ) {
+        push @download_tools, "wget";
+    }
+    if ( @download_tools == 0 ) {
+        color_print(
+            "Error: No download tool found. Please install curl or wget.",
+            "bad" );
+        exit 1;
+    }
+    return @download_tools;
+}
+
+# Try and guess the OS
+sub guess_os {
+    my $os = "unknown";
+    if ( file_exists("/usr/bin/cygwin1.dll") ) {
+        $os = "cygwin";
+    }
+    elsif ( file_exists("/usr/bin/sw_vers") ) {
+        $os = "macos";
+    }
+    elsif ( file_exists("/etc/os-release") ) {
+        $os = "linux";
+    }
+    return $os;
+}
+
+# Try and guess the architecture
+sub guess_architecture {
+    my $architecture = "unknown";
+    if ( file_exists("/usr/bin/uname") ) {
+        return `uname -m`;
+    }
+}
+
 1;

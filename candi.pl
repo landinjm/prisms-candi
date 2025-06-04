@@ -140,6 +140,34 @@ if (
 }
 
 #############################################################
+# Some brief setup based on the system and environment
+
+# Get the download tool
+my @download_tools = utilities::check_download_tools();
+
+# Get the os
+my $os = utilities::guess_os();
+utilities::color_print( "OS: $os", "info" );
+if ( $os eq "unknown" ) {
+    utilities::color_print(
+"Error: Unknown OS. Please report this issue to the PRISMS-candi developers.",
+        "bad"
+    );
+    exit 1;
+}
+
+# Get the architecture
+my $architecture = utilities::guess_architecture();
+utilities::color_print( "Architecture: $architecture", "info" );
+if ( $architecture eq "unknown" ) {
+    utilities::color_print(
+"Error: Unknown architecture. Please report this issue to the PRISMS-candi developers.",
+        "bad"
+    );
+    exit 1;
+}
+
+#############################################################
 # Packages management
 my @packages_to_install = ();
 {
@@ -148,13 +176,11 @@ my @packages_to_install = ();
     my @required_packages =
       ( "git", "cmake", "zlib", "boost", "openblas", "openmpi" );
 
-    # Required packages for PRISMS-PF
-    my @prisms_pf_packages =
-      ( "openblas", "openmpi", "p4est", "kokkos", "vtk", "zlib" );
+    # Other required packages for PRISMS-PF
+    my @prisms_pf_packages = ( "p4est", "kokkos", "vtk" );
 
-    # Required packages for PRISMS-PLASTICITY
-    my @prisms_plasticity_packages =
-      ( "openblas", "openmpi", "p4est", "kokkos", "petsc", "hdf5", "zlib" );
+    # Other required packages for PRISMS-PLASTICITY
+    my @prisms_plasticity_packages = ( "p4est", "kokkos", "petsc", "hdf5" );
 
     # Optional packages
     my @optional_prisms_pf_packages = ( "gsl", "hdf5", "sundials", "caliper" );
