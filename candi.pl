@@ -147,9 +147,6 @@ if (
 #############################################################
 # Some brief setup based on the system and environment
 
-# Get the download tool
-my @download_tools = utilities::check_download_tools();
-
 # Get the os
 my $os = utilities::guess_os();
 utilities::color_print( "OS: $os", "info" );

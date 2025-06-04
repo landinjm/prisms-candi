@@ -44,6 +44,9 @@ sub fetch_package {
 
     utilities::color_print( "Fetching $name $version...", "info" );
 
+    # Navigate to the src directory
+    chdir($src_path) or die "Failed to change to src directory: $!";
+
     # Call the package's fetch function
     my $package_name = "packages::$pkg";
     no strict 'refs';

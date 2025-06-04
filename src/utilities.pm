@@ -152,4 +152,13 @@ sub guess_architecture {
     }
 }
 
+# Get the checksum of a file
+sub get_checksum {
+    my $file     = shift;
+    my $checksum = `sha256sum $file` || "null";
+    chomp $checksum;
+    $checksum =~ s/^(\S+).*$/$1/;    # Extract everything before the first space
+    return $checksum;
+}
+
 1;
