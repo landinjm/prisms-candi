@@ -12,8 +12,8 @@ sub fetch { }
 
 sub unpack { }
 
-sub configure { }
-
 sub build { }
+
+sub register { }
 
 1;
