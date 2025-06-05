@@ -10,10 +10,15 @@ our $PRIORITY = 5;
 
 sub fetch { }
 
-sub unpack { }
+sub unpack {
+    my $unpack_path = shift;
+}
 
-sub build { }
+sub build {
+    my ( $unpack_path, $install_path ) = @_;
+}
 
-sub register { }
-
+sub register {
+    my $install_path = shift;
+}
 1;
