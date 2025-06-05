@@ -45,7 +45,7 @@ sub fetch_package {
     utilities::color_print( "Fetching $name $version...", "info" );
 
     # Navigate to the src directory
-    chdir($src_path) or die "Failed to change to src directory: $!";
+    chdir($src_path);
 
     # Call the package's fetch function
     my $package_name = "packages::$pkg";
@@ -63,31 +63,24 @@ sub unpack_package {
     my $package_file = "src/packages/$pkg.pm";
     require $package_file;
 
+    # Get package information
+    my $name    = get_package_var( $pkg, 'NAME' )    || $pkg;
+    my $version = get_package_var( $pkg, 'VERSION' ) || "unknown";
+
+    utilities::color_print( "Unpacking $name $version...", "info" );
+
+    # Navigate to the src directory
+    chdir($src_path);
+
     # Call the package's unpack function
     my $package_name = "packages::$pkg";
     no strict 'refs';
     my $unpack_func = \&{"${package_name}::unpack"};
-    $unpack_func->() if defined $unpack_func;
+    $unpack_func->($unpack_path) if defined $unpack_func;
     use strict 'refs';
 }
 
-# Configure a package
-sub configure_package {
-    my ($pkg) = @_;
-
-    # Load the package module
-    my $package_file = "src/packages/$pkg.pm";
-    require $package_file;
-
-    # Call the package's configure function
-    my $package_name = "packages::$pkg";
-    no strict 'refs';
-    my $configure_func = \&{"${package_name}::configure"};
-    $configure_func->() if defined $configure_func;
-    use strict 'refs';
-}
-
-# Build a package
+# Configure and build a package
 sub build_package {
     my ($pkg) = @_;
 
@@ -95,11 +88,45 @@ sub build_package {
     my $package_file = "src/packages/$pkg.pm";
     require $package_file;
 
+    # Get package information
+    my $name    = get_package_var( $pkg, 'NAME' )    || $pkg;
+    my $version = get_package_var( $pkg, 'VERSION' ) || "unknown";
+
+    utilities::color_print( "Building $name $version...", "info" );
+
+    # Navigate to the build directory
+    chdir($build_path);
+
     # Call the package's build function
     my $package_name = "packages::$pkg";
     no strict 'refs';
     my $build_func = \&{"${package_name}::build"};
-    $build_func->() if defined $build_func;
+    $build_func->( $unpack_path, $install_path ) if defined $build_func;
+    use strict 'refs';
+}
+
+# Register a package
+sub register_package {
+    my ($pkg) = @_;
+
+    # Load the package module
+    my $package_file = "src/packages/$pkg.pm";
+    require $package_file;
+
+    # Get package information
+    my $name    = get_package_var( $pkg, 'NAME' )    || $pkg;
+    my $version = get_package_var( $pkg, 'VERSION' ) || "unknown";
+
+    utilities::color_print( "Registering $name $version...", "info" );
+
+    # Navigate to the install directory
+    chdir($install_path);
+
+    # Call the package's build function
+    my $package_name = "packages::$pkg";
+    no strict 'refs';
+    my $register_func = \&{"${package_name}::register"};
+    $register_func->($install_path) if defined $register_func;
     use strict 'refs';
 }
 

@@ -346,11 +346,11 @@ for my $pkg (@packages_to_install) {
     # Unpack the package
     package_manager::unpack_package($pkg);
 
-    # Configure the package
-    package_manager::configure_package($pkg);
-
     # Build the package
     package_manager::build_package($pkg);
+
+    # Register the package
+    package_manager::register_package($pkg);
 }
 
 #############################################################

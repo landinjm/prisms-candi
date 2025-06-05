@@ -101,6 +101,12 @@ sub file_exists {
     return -e $file;
 }
 
+# Check if a directory exists
+sub directory_exists {
+    my $dir = shift;
+    return -d $dir;
+}
+
 # Check if a value is a positive integer
 sub is_positive_integer {
     my $value = shift;

@@ -42,18 +42,30 @@ sub download_archive {
     my $successful_download = 0;
     for my $downloader (@download_methods) {
 
-        # Download the archive
-        print("Downloading $archive_url with $downloader\n");
-        if ( $downloader eq "curl" ) {
-            system("curl -f -L -k -O $archive_url");
-        }
-        elsif ( $downloader eq "wget" ) {
-            system("wget --no-check-certificate $archive_url -O $archive_name");
+        # Check if the archive file already exists
+        if ( utilities::file_exists($archive_name) ) {
+            utilities::color_print(
+                "Archive $archive_name already exists, skipping download",
+                "info" );
+
         }
         else {
-            utilities::color_print( "Error: Unknown downloader: $downloader",
-                "bad" );
-            exit 1;
+
+            # Download the archive
+            print("Downloading $archive_url with $downloader\n");
+            if ( $downloader eq "curl" ) {
+                system("curl -f -L -k -O $archive_url");
+            }
+            elsif ( $downloader eq "wget" ) {
+                system(
+                    "wget --no-check-certificate $archive_url -O $archive_name"
+                );
+            }
+            else {
+                utilities::color_print(
+                    "Error: Unknown downloader: $downloader", "bad" );
+                exit 1;
+            }
         }
 
         # Verify the archive
