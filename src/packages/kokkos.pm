@@ -66,6 +66,10 @@ sub build {
 
 sub register {
     my $install_path = shift;
+
+    # Add to path
+    my $new_path = "$install_path/$NAME-$VERSION/bin";
+    $ENV{PATH} = "$new_path:$ENV{PATH}";
 }
 
 1;
