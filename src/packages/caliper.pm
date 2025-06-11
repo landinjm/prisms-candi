@@ -7,6 +7,7 @@ use lib 'src';
 use utilities;
 use archive_manager;
 use File::Path qw(rmtree);
+use Cwd        qw(abs_path);
 
 our $PRIORITY = 14;
 
@@ -93,6 +94,20 @@ sub register {
     # Add to path
     my $new_path = "$install_path/$NAME-$VERSION/bin";
     $ENV{PATH} = "$new_path:$ENV{PATH}";
+
+    my $config = Config::Tiny->read($config_file);
+    if ( !$config ) {
+        utilities::color_print(
+            "Error: Failed to read config file: " . Config::Tiny->errstr(),
+            "bad" );
+        exit 1;
+    }
+
+    # Add to the summary file
+    $config->{"caliper"} = { install_dir => $new_path };
+
+    # Close the summary file
+    $config->write($config_file);
 }
 
 1;

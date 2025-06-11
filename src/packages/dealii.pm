@@ -63,10 +63,43 @@ sub unpack {
 
 sub build {
     my ( $unpack_path, $install_path ) = @_;
+
+    # Create the build folder
+    mkdir("$NAME-$VERSION");
+
+    # Navigate to the build folder
+    chdir("$NAME-$VERSION");
+
+    # Run cmake
+    system(
+"cmake -DDEAL_II_WITH_MPI=ON -DDEAL_II_WITH_P4EST=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
+    );
+
+    # Build
+    system("make && make install");
+
 }
 
 sub register {
     my $install_path = shift;
+
+    # Add to path
+    my $new_path = "$install_path/$NAME-$VERSION/bin";
+    $ENV{PATH} = "$new_path:$ENV{PATH}";
+
+    my $config = Config::Tiny->read($config_file);
+    if ( !$config ) {
+        utilities::color_print(
+            "Error: Failed to read config file: " . Config::Tiny->errstr(),
+            "bad" );
+        exit 1;
+    }
+
+    # Add to the summary file
+    $config->{"dealii"} = { install_dir => $new_path };
+
+    # Close the summary file
+    $config->write($config_file);
 }
 
 1;

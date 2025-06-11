@@ -376,10 +376,10 @@ for my $pkg (@packages_to_install) {
     package_manager::unpack_package($pkg);
 
     # Build the package
-    #package_manager::build_package($pkg);
+    package_manager::build_package($pkg);
 
     # Register the package
-    #package_manager::register_package($pkg);
+    package_manager::register_package($pkg);
 }
 
 #############################################################

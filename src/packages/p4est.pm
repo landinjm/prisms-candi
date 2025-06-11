@@ -7,6 +7,7 @@ use lib 'src';
 use utilities;
 use archive_manager;
 use File::Path qw(rmtree);
+use Cwd        qw(abs_path);
 
 our $PRIORITY = 11;
 
@@ -18,7 +19,7 @@ our $CHECKSUM =
   "0a1e912f3529999ca6d62fee335d51f24b5650b586e95a03ef39ebf73936d7f4";
 
 # Read the config file
-my $config_file = "summary.conf";
+my $config_file = abs_path("summary.conf");
 my $config      = Config::Tiny->read($config_file);
 if ( !$config ) {
     utilities::color_print(
@@ -57,6 +58,19 @@ sub unpack {
 
 sub build {
     my ( $unpack_path, $install_path ) = @_;
+
+    # Copy the unpacked folder to the build path
+    system("cp -rf $unpack_path/$NAME-$VERSION .");
+
+    # Navigate to the build folder
+    chdir("$NAME-$VERSION");
+
+    # Configure the package
+    system("./configure --enable-mpi --prefix=$install_path/$NAME-$VERSION");
+
+    # Build the package
+    system("make && make install");
+
 }
 
 sub register {
@@ -65,6 +79,20 @@ sub register {
     # Add to path
     my $new_path = "$install_path/$NAME-$VERSION/bin";
     $ENV{PATH} = "$new_path:$ENV{PATH}";
+
+    my $config = Config::Tiny->read($config_file);
+    if ( !$config ) {
+        utilities::color_print(
+            "Error: Failed to read config file: " . Config::Tiny->errstr(),
+            "bad" );
+        exit 1;
+    }
+
+    # Add to the summary file
+    $config->{"p4est"} = { install_dir => $new_path };
+
+    # Close the summary file
+    $config->write($config_file);
 }
 
 1;

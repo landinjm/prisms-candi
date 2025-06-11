@@ -7,6 +7,7 @@ use lib 'src';
 use utilities;
 use archive_manager;
 use File::Path qw(rmtree);
+use Cwd        qw(abs_path);
 
 our $PRIORITY = 8;
 
@@ -18,7 +19,7 @@ our $CHECKSUM =
   "b9d70e4653b87a06dbb48d63291bf248058c7c7db4bd91979676ad5609bb1a3a";
 
 # Read the config file
-my $config_file = "summary.conf";
+my $config_file = abs_path("summary.conf");
 my $config      = Config::Tiny->read($config_file);
 if ( !$config ) {
     utilities::color_print(
@@ -79,6 +80,20 @@ sub register {
     # Add to path
     my $new_path = "$install_path/$NAME-$VERSION/bin";
     $ENV{PATH} = "$new_path:$ENV{PATH}";
+
+    my $config = Config::Tiny->read($config_file);
+    if ( !$config ) {
+        utilities::color_print(
+            "Error: Failed to read config file: " . Config::Tiny->errstr(),
+            "bad" );
+        exit 1;
+    }
+
+    # Add to the summary file
+    $config->{"kokkos"} = { install_dir => $new_path };
+
+    # Close the summary file
+    $config->write($config_file);
 }
 
 1;

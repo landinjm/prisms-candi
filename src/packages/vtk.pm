@@ -7,6 +7,7 @@ use lib 'src';
 use utilities;
 use archive_manager;
 use File::Path qw(rmtree);
+use Cwd        qw(abs_path);
 
 our $PRIORITY = 13;
 
@@ -18,7 +19,7 @@ our $CHECKSUM =
   "36c98e0da96bb12a30fe53708097aa9492e7b66d5c3b366e1c8dc251e2856a02";
 
 # Read the config file
-my $config_file = "summary.conf";
+my $config_file = abs_path("summary.conf");
 my $config      = Config::Tiny->read($config_file);
 if ( !$config ) {
     utilities::color_print(
@@ -80,6 +81,20 @@ sub register {
     # Add to path
     my $new_path = "$install_path/$NAME-$VERSION/bin";
     $ENV{PATH} = "$new_path:$ENV{PATH}";
+
+    my $config = Config::Tiny->read($config_file);
+    if ( !$config ) {
+        utilities::color_print(
+            "Error: Failed to read config file: " . Config::Tiny->errstr(),
+            "bad" );
+        exit 1;
+    }
+
+    # Add to the summary file
+    $config->{"vtk"} = { install_dir => $new_path };
+
+    # Close the summary file
+    $config->write($config_file);
 }
 
 1;
