@@ -67,7 +67,7 @@ sub build {
 
     # Run cmake
     system(
-"cmake -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
+"cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
     );
 
     # Build
