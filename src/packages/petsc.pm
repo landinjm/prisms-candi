@@ -20,13 +20,7 @@ our $CHECKSUM =
   "bb51e8cbaa3782afce38c6f0bdd64d20ed090695992b7d49817518aa7e909139";
 
 # Read the config file
-my $config_file = "candi.conf";
-if ( !utilities::file_exists($config_file) ) {
-    utilities::color_print( "Error: Config file '$config_file' not found",
-        "bad" );
-    exit 1;
-}
-
+my $config_file = "summary.conf";
 my $config = Config::Tiny->read($config_file);
 if ( !$config ) {
     utilities::color_print(
@@ -34,53 +28,19 @@ if ( !$config ) {
     exit 1;
 }
 
-# Check compilers
-# Check and set CC if not defined
-if ( !defined $ENV{CC} ) {
-    my $mpicc = `which mpicc 2>/dev/null`;
-    chomp($mpicc);
-    if ($mpicc) {
-        utilities::color_print( "CC variable not set, but default mpicc found.",
-            "warn" );
-        $ENV{CC} = 'mpicc';
-    }
-}
-
-# Check and set CXX if not defined
-if ( !defined $ENV{CXX} ) {
-    my $mpicxx = `which mpicxx 2>/dev/null`;
-    chomp($mpicxx);
-    if ($mpicxx) {
-        utilities::color_print(
-            "CXX variable not set, but default mpicxx found.", "warn" );
-        $ENV{CXX} = 'mpicxx';
-    }
-}
-
-# Check and set FC if not defined
-if ( !defined $ENV{FC} ) {
-    my $mpif90 = `which mpif90 2>/dev/null`;
-    chomp($mpif90);
-    if ($mpif90) {
-        utilities::color_print(
-            "FC variable not set, but default mpif90 found.", "warn" );
-        $ENV{FC} = 'mpif90';
-    }
-}
-
 # Determine configuration options for petsc
 our $opt_flags = qq{"-g -O"};
-if ( $config->{misc_configs}->{enable_native_optimizations} eq "ON" ) {
+if ( $config->{"Compile Flags"}->{native_optimizations} eq "ON" ) {
     $opt_flags = qq{"-O3 -march=native -mtune=native"};
 }
 our $conf_opts =
   "--with-deubgging=0 --with-shared-libraries=1 --with-mpi=1 --with-x=0";
-if ( $config->{misc_configs}->{enable_64bit_indices} eq "ON" ) {
+if ( $config->{"Compile Flags"}->{"64bit"} eq "ON" ) {
     $conf_opts .= " --with-64-bit-indicies=1";
 }
-$conf_opts .= " CC=$ENV{CC}"   if defined $ENV{CC}  && $ENV{CC} ne "";
-$conf_opts .= " CXX=$ENV{CXX}" if defined $ENV{CXX} && $ENV{CXX} ne "";
-$conf_opts .= " FC=$ENV{FC}"   if defined $ENV{FC}  && $ENV{FC} ne "";
+$conf_opts .= " CC=$config->{"Compilers"}->{CC}";
+$conf_opts .= " CXX=$config->{"Compilers"}->{CXX}";
+$conf_opts .= " FC=$config->{"Compilers"}->{FC}";
 
 sub fetch {
 

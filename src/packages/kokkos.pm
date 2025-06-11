@@ -17,6 +17,15 @@ our $PACKING_TYPE = "tar.gz";
 our $CHECKSUM =
   "b9d70e4653b87a06dbb48d63291bf248058c7c7db4bd91979676ad5609bb1a3a";
 
+# Read the config file
+my $config_file = "summary.conf";
+my $config      = Config::Tiny->read($config_file);
+if ( !$config ) {
+    utilities::color_print(
+        "Error: Failed to read config file: " . Config::Tiny->errstr(), "bad" );
+    exit 1;
+}
+
 sub fetch {
 
     # Construct the archive url

@@ -17,14 +17,8 @@ our $PACKING_TYPE = "tar.gz";
 our $CHECKSUM     = "";
 
 # Read the config file
-my $config_file = "candi.conf";
-if ( !utilities::file_exists($config_file) ) {
-    utilities::color_print( "Error: Config file '$config_file' not found",
-        "bad" );
-    exit 1;
-}
-
-my $config = Config::Tiny->read($config_file);
+my $config_file = "summary.conf";
+my $config      = Config::Tiny->read($config_file);
 if ( !$config ) {
     utilities::color_print(
         "Error: Failed to read config file: " . Config::Tiny->errstr(), "bad" );

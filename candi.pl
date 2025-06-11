@@ -351,6 +351,11 @@ $summary->{"Compilers"} = {
     FC  => $ENV{FC_PATH},
     FF  => $ENV{FF_PATH}
 };
+$summary->{"deal.II"} = {
+    version        => $config->{"deal.II"}->{version},
+    build_examples => $config->{"deal.II"}->{build_examples}
+};
+$summary->{"General Configuration"} = { packages => $packages, jobs => $jobs };
 
 $summary->write("summary.conf");
 

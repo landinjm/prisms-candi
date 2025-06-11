@@ -8,6 +8,15 @@ use utilities;
 
 our $PRIORITY = 2;
 
+# Read the config file
+my $config_file = "summary.conf";
+my $config      = Config::Tiny->read($config_file);
+if ( !$config ) {
+    utilities::color_print(
+        "Error: Failed to read config file: " . Config::Tiny->errstr(), "bad" );
+    exit 1;
+}
+
 sub fetch { }
 
 sub unpack {

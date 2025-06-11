@@ -17,6 +17,15 @@ our $PACKING_TYPE = "tar.gz";
 our $CHECKSUM =
   "2b5a8f98382c94dc75cc3f4517c758eaf9a3f9cea0a8dbdc7b38506060d6955c";
 
+# Read the config file
+my $config_file = "summary.conf";
+my $config      = Config::Tiny->read($config_file);
+if ( !$config ) {
+    utilities::color_print(
+        "Error: Failed to read config file: " . Config::Tiny->errstr(), "bad" );
+    exit 1;
+}
+
 sub fetch {
 
     # Since we rename the file we have to have a separate check
