@@ -19,6 +19,17 @@ our $CHECKSUM =
 
 sub fetch {
 
+    # Since we rename the file we have to have a separate check
+    # to see if we've already downloaded the archive.
+    if ( utilities::file_exists("$NAME-$VERSION.$PACKING_TYPE") ) {
+        utilities::color_print(
+"Archive $NAME-$VERSION.$PACKING_TYPE already exists, skipping download",
+            "info"
+        );
+        return 0;
+
+    }
+
     # Construct the archive url
     my $archive_url = "$SOURCE_URL$VERSION.$PACKING_TYPE";
 

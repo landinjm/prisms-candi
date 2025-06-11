@@ -331,6 +331,30 @@ make_path("$unpack_path");
 make_path("$build_path");
 
 #############################################################
+# Start writing a summary file so the various packages can
+# reference that instead.
+my $summary = Config::Tiny->new();
+$summary->{"Install Paths"} = {
+    install_path => $install_path,
+    src_path     => $src_path,
+    unpack_path  => $unpack_path,
+    build_path   => $build_path
+};
+$summary->{"Compile Flags"} = {
+    native_optimizations =>
+      $config->{misc_configs}->{enable_native_optimizations},
+    '64bit' => $config->{misc_configs}->{enable_64bit_indices}
+};
+$summary->{"Compilers"} = {
+    CC  => $ENV{CC_PATH},
+    CXX => $ENV{CXX_PATH},
+    FC  => $ENV{FC_PATH},
+    FF  => $ENV{FF_PATH}
+};
+
+$summary->write("summary.conf");
+
+#############################################################
 # Begin installing the packages
 
 # Initialize the package manager
@@ -347,10 +371,10 @@ for my $pkg (@packages_to_install) {
     package_manager::unpack_package($pkg);
 
     # Build the package
-    package_manager::build_package($pkg);
+    #package_manager::build_package($pkg);
 
     # Register the package
-    package_manager::register_package($pkg);
+    #package_manager::register_package($pkg);
 }
 
 #############################################################
