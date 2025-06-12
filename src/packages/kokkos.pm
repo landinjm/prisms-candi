@@ -92,7 +92,7 @@ sub register {
     # Add to the summary file
     $config->{"kokkos"} = { install_dir => $new_path };
 
-    # Close the summary file
+    # Write the summary file
     $config->write($config_file);
 }
 

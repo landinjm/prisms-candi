@@ -7,6 +7,7 @@ use lib 'src';
 use utilities;
 use archive_manager;
 use File::Path qw(rmtree);
+use File::Spec;
 
 our $PRIORITY = 100;
 
@@ -98,8 +99,15 @@ sub register {
     # Add to the summary file
     $config->{"dealii"} = { install_dir => $new_path };
 
-    # Close the summary file
+    # Write the summary file
     $config->write($config_file);
+
+    # Add to a configuration file
+    my $install_path = $config->{"Install Paths"}->{install_path};
+    my $config_file  = File::Spec->catfile( $install_path, 'prisms_env.sh' );
+    open( my $fh, '>', $config_file ) or die "Cannot write to $config_file: $!";
+    print $fh "export DEAL_II_DIR=$new_path\n";
+    close($fh);
 }
 
 1;
