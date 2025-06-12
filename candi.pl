@@ -115,6 +115,8 @@ utilities::check_config_value( "enable_native_optimizations",
     $config->{misc_configs}->{enable_native_optimizations} );
 utilities::check_config_value( "enable_64bit_indices",
     $config->{misc_configs}->{enable_64bit_indices} );
+utilities::check_config_value( "enable_dev_mode",
+    $config->{misc_configs}->{enable_dev_mode} );
 
 # TODO sanitize the other inputs
 
@@ -198,7 +200,8 @@ $summary->{"General Configuration"} = {
     packages => "null",
     jobs     => $jobs,
     os       => $os,
-    arch     => $architecture
+    arch     => $architecture,
+    dev_mode => $config->{misc_configs}->{enable_dev_mode}
 };
 $summary->write($summary_file);
 

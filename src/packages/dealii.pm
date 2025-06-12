@@ -33,6 +33,18 @@ our $jobs = $config->{"General Configuration"}->{jobs};
 
 # Determine some configuration options
 $VERSION = $config->{'deal.II'}->{version};
+our $conf_opts = qq{-DDEAL_II_WITH_MPI=ON -DDEAL_II_WITH_P4EST=ON};
+if ( $config->{"General Configuration"}->{dev_mode} eq "ON" ) {
+    $conf_opts .= qq{ -DDEAL_II_ALLOW_AUTODETECTION=OFF};
+}
+$conf_opts .=
+  qq{ -DDEAL_II_COMPONENT_EXAMPLES=$config->{"deal.II"}->{build_examples}};
+if ( $config->{"Compile Flags"}->{native_optimizations} eq "ON" ) {
+    $conf_opts .=
+qq{ -DCMAKE_CXX_FLAGS="-march=native -mtune=native" -DCMAKE_CXX_FLAGS_RELEASE="-O3"};
+}
+$conf_opts .=
+  qq{ -DDEAL_II_WITH_64BIT_INDICES=$config->{"Compile Flags"}->{"64bit"}};
 
 sub fetch {
 
@@ -77,8 +89,10 @@ sub build {
 
     # Run cmake
     system(
-"cmake -G Ninja -DDEAL_II_WITH_MPI=ON -DDEAL_II_WITH_P4EST=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
+"cmake -G Ninja $conf_opts -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
     );
+
+    exit 0;
 
     # Build
     system("ninja -j$jobs && ninja install");
