@@ -20,6 +20,7 @@ Install the required perl modules with cpan
 ```
 cpan
 install Config::Tiny
+exit
 ```
 Clone the repo
 ```
