@@ -5,20 +5,18 @@ use warnings;
 
 use lib 'src';
 use utilities;
-use archive_manager;
 use File::Path qw(rmtree);
 use File::Spec;
+use Cwd qw(abs_path);
 
 our $PRIORITY = 100;
 
-our $VERSION      = "";
-our $NAME         = "dealii";
-our $SOURCE_URL   = "https://www.dealii.org/downloads/";
-our $PACKING_TYPE = "tar.gz";
-our $CHECKSUM     = "";
+our $VERSION    = "";
+our $NAME       = "dealii";
+our $SOURCE_URL = "https://github.com/dealii/dealii.git";
 
 # Read the config file
-my $config_file = "summary.conf";
+my $config_file = abs_path("summary.conf");
 my $config      = Config::Tiny->read($config_file);
 if ( !$config ) {
     utilities::color_print(
@@ -26,29 +24,32 @@ if ( !$config ) {
     exit 1;
 }
 
+# Grab the number of jobs from the config file
+my $jobs = $config->{"General Configuration"}->{jobs};
+
 # Determine some configuration options
 $VERSION = $config->{'deal.II'}->{version};
-if ( $VERSION eq "9.6.2" ) {
-    $CHECKSUM =
-      "1051e332de3822488e91c2b0460681052a3c4c5ac261cdd7a6af784869a25523";
-}
 
 sub fetch {
 
-    # Construct the archive url
-    my $archive_url = "$SOURCE_URL$NAME-$VERSION.$PACKING_TYPE";
+    # Clone the repository if it doesn't exist
+    if ( !utilities::directory_exists("$NAME-$VERSION") ) {
+        system("git clone $SOURCE_URL $NAME-$VERSION");
+    }
 
-    # Download the archive
-    archive_manager::download_archive( $archive_url, $CHECKSUM );
+    # Checkout the version
+    system(
+"cd $NAME-$VERSION && git fetch --all --tags --prune && git checkout tags/v$VERSION"
+    );
 }
 
 sub unpack {
     my $unpack_path = shift;
 
-    # Double check that the archive was downloaded
-    if ( !utilities::file_exists("$NAME-$VERSION.$PACKING_TYPE") ) {
-        utilities::color_print(
-            "Error: Archive $NAME-$VERSION.$PACKING_TYPE not found", "bad" );
+    # Double check that the repository was cloned
+    if ( !utilities::directory_exists("$NAME-$VERSION") ) {
+        utilities::color_print( "Error: Repository $NAME-$VERSION not found",
+            "bad" );
         exit 1;
     }
 
@@ -57,9 +58,8 @@ sub unpack {
         rmtree("$unpack_path/$NAME-$VERSION");
     }
 
-    # Unpack the archive
-    system("tar -xzf $NAME-$VERSION.$PACKING_TYPE -C $unpack_path");
-
+    # Move the repository to the unpack path
+    system("mv $NAME-$VERSION $unpack_path");
 }
 
 sub build {
@@ -77,7 +77,7 @@ sub build {
     );
 
     # Build
-    system("make && make install");
+    system("make -j$jobs && make install");
 
 }
 
@@ -103,9 +103,9 @@ sub register {
     $config->write($config_file);
 
     # Add to a configuration file
-    my $install_path = $config->{"Install Paths"}->{install_path};
-    my $config_file  = File::Spec->catfile( $install_path, 'prisms_env.sh' );
-    open( my $fh, '>', $config_file ) or die "Cannot write to $config_file: $!";
+    my $config_file = File::Spec->catfile( $install_path, 'prisms_env.sh' );
+    open( my $fh, '>>', $config_file )
+      or die "Cannot append to $config_file: $!";
     print $fh "export DEAL_II_DIR=$new_path\n";
     close($fh);
 }

@@ -170,6 +170,27 @@ if ( $architecture eq "unknown" ) {
 }
 
 #############################################################
+# Start writing a summary file so the various packages can
+# reference that instead.
+my $summary = Config::Tiny->new();
+$summary->{"Install Paths"} = {
+    install_path => $install_path,
+    src_path     => $src_path,
+    unpack_path  => $unpack_path,
+    build_path   => $build_path
+};
+$summary->{"Compile Flags"} = {
+    native_optimizations =>
+      $config->{misc_configs}->{enable_native_optimizations},
+    '64bit' => $config->{misc_configs}->{enable_64bit_indices}
+};
+$summary->{"deal.II"} = {
+    version        => $config->{"deal.II"}->{version},
+    build_examples => $config->{"deal.II"}->{build_examples}
+};
+$summary->write("summary.conf");
+
+#############################################################
 # Package management
 my @packages_to_install = ();
 {
@@ -331,32 +352,19 @@ make_path("$unpack_path");
 make_path("$build_path");
 
 #############################################################
-# Start writing a summary file so the various packages can
-# reference that instead.
-my $summary = Config::Tiny->new();
-$summary->{"Install Paths"} = {
-    install_path => $install_path,
-    src_path     => $src_path,
-    unpack_path  => $unpack_path,
-    build_path   => $build_path
-};
-$summary->{"Compile Flags"} = {
-    native_optimizations =>
-      $config->{misc_configs}->{enable_native_optimizations},
-    '64bit' => $config->{misc_configs}->{enable_64bit_indices}
-};
+# Add some more info to the summary file
 $summary->{"Compilers"} = {
     CC  => $ENV{CC_PATH},
     CXX => $ENV{CXX_PATH},
     FC  => $ENV{FC_PATH},
     FF  => $ENV{FF_PATH}
 };
-$summary->{"deal.II"} = {
-    version        => $config->{"deal.II"}->{version},
-    build_examples => $config->{"deal.II"}->{build_examples}
+$summary->{"General Configuration"} = {
+    packages => $packages,
+    jobs     => $jobs,
+    os       => $os,
+    arch     => $architecture
 };
-$summary->{"General Configuration"} = { packages => $packages, jobs => $jobs };
-
 $summary->write("summary.conf");
 
 #############################################################
@@ -381,6 +389,19 @@ for my $pkg (@packages_to_install) {
     # Register the package
     package_manager::register_package($pkg);
 }
+
+#############################################################
+# Tell the user to source the environment file
+utilities::color_print(
+    "\nTo use the installed software, source the environment file:\n", "info" );
+utilities::color_print( "source $install_path/prisms_env.sh\n", "info" );
+utilities::color_print(
+    "This can be done by adding the previous line to your .bashrc 
+or .zshrc file. This will add the necessary environment 
+variables to your shell. You can also source the file manually
+each time.\n",
+    "info"
+);
 
 #############################################################
 # Print the time taken

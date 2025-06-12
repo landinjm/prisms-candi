@@ -7,7 +7,8 @@ use lib 'src';
 use utilities;
 use archive_manager;
 use File::Path qw(rmtree);
-use Cwd        qw(abs_path);
+use File::Spec;
+use Cwd qw(abs_path);
 
 our $PRIORITY = 14;
 
@@ -19,13 +20,16 @@ our $CHECKSUM =
   "2b5a8f98382c94dc75cc3f4517c758eaf9a3f9cea0a8dbdc7b38506060d6955c";
 
 # Read the config file
-my $config_file = "summary.conf";
+my $config_file = abs_path("summary.conf");
 my $config      = Config::Tiny->read($config_file);
 if ( !$config ) {
     utilities::color_print(
         "Error: Failed to read config file: " . Config::Tiny->errstr(), "bad" );
     exit 1;
 }
+
+# Grab the number of jobs from the config file
+my $jobs = $config->{"General Configuration"}->{jobs};
 
 sub fetch {
 
@@ -85,7 +89,7 @@ sub build {
     );
 
     # Build
-    system("make && make install");
+    system("make -j$jobs && make install");
 }
 
 sub register {
@@ -108,6 +112,13 @@ sub register {
 
     # Write the summary file
     $config->write($config_file);
+
+    # Add to a configuration file
+    my $config_file = File::Spec->catfile( $install_path, 'prisms_env.sh' );
+    open( my $fh, '>>', $config_file )
+      or die "Cannot append to $config_file: $!";
+    print $fh "export CALIPER_DIR=$new_path\n";
+    close($fh);
 }
 
 1;

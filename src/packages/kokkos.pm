@@ -7,7 +7,8 @@ use lib 'src';
 use utilities;
 use archive_manager;
 use File::Path qw(rmtree);
-use Cwd        qw(abs_path);
+use File::Spec;
+use Cwd qw(abs_path);
 
 our $PRIORITY = 8;
 
@@ -26,6 +27,9 @@ if ( !$config ) {
         "Error: Failed to read config file: " . Config::Tiny->errstr(), "bad" );
     exit 1;
 }
+
+# Grab the number of jobs from the config file
+my $jobs = $config->{"General Configuration"}->{jobs};
 
 sub fetch {
 
@@ -71,7 +75,7 @@ sub build {
     );
 
     # Build
-    system("make && make install");
+    system("make -j$jobs && make install");
 }
 
 sub register {
@@ -94,6 +98,13 @@ sub register {
 
     # Write the summary file
     $config->write($config_file);
+
+    # Add to a configuration file
+    my $config_file = File::Spec->catfile( $install_path, 'prisms_env.sh' );
+    open( my $fh, '>>', $config_file )
+      or die "Cannot append to $config_file: $!";
+    print $fh "export KOKKOS_DIR=$new_path\n";
+    close($fh);
 }
 
 1;

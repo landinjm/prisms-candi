@@ -26,6 +26,9 @@ if ( !$config ) {
     exit 1;
 }
 
+# Grab the number of jobs from the config file
+my $jobs = $config->{"General Configuration"}->{jobs};
+
 sub fetch {
 
     # Construct the archive url

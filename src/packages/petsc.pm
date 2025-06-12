@@ -28,6 +28,9 @@ if ( !$config ) {
     exit 1;
 }
 
+# Grab the number of jobs from the config file
+my $jobs = $config->{"General Configuration"}->{jobs};
+
 # Determine configuration options for petsc
 our $opt_flags = qq{"-g -O"};
 if ( $config->{"Compile Flags"}->{native_optimizations} eq "ON" ) {
