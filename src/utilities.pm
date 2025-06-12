@@ -154,7 +154,9 @@ sub guess_os {
 sub guess_architecture {
     my $architecture = "unknown";
     if ( file_exists("/usr/bin/uname") ) {
-        return `uname -m`;
+        my $arch = `uname -m`;
+        chomp $arch;
+        return $arch;
     }
 }
 

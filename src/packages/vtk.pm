@@ -29,7 +29,7 @@ if ( !$config ) {
 }
 
 # Grab the number of jobs from the config file
-my $jobs = $config->{"General Configuration"}->{jobs};
+our $jobs = $config->{"General Configuration"}->{jobs};
 
 sub fetch {
 
@@ -71,11 +71,11 @@ sub build {
 
     # Run cmake
     system(
-"cmake -DVTK_USE_MPI=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
+"cmake -G Ninja -DVTK_USE_MPI=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
     );
 
     # Build
-    system("make -j$jobs && make install");
+    system("ninja -j$jobs && ninja install");
 
 }
 

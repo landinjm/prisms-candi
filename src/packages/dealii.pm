@@ -25,7 +25,7 @@ if ( !$config ) {
 }
 
 # Grab the number of jobs from the config file
-my $jobs = $config->{"General Configuration"}->{jobs};
+our $jobs = $config->{"General Configuration"}->{jobs};
 
 # Determine some configuration options
 $VERSION = $config->{'deal.II'}->{version};
@@ -73,11 +73,11 @@ sub build {
 
     # Run cmake
     system(
-"cmake -DDEAL_II_WITH_MPI=ON -DDEAL_II_WITH_P4EST=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
+"cmake -G Ninja -DDEAL_II_WITH_MPI=ON -DDEAL_II_WITH_P4EST=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
     );
 
     # Build
-    system("make -j$jobs && make install");
+    system("ninja -j$jobs && ninja install");
 
 }
 

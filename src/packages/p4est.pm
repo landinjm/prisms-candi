@@ -29,7 +29,7 @@ if ( !$config ) {
 }
 
 # Grab the number of jobs from the config file
-my $jobs = $config->{"General Configuration"}->{jobs};
+our $jobs = $config->{"General Configuration"}->{jobs};
 
 sub fetch {
 

@@ -4,6 +4,7 @@ use strict;
 use Config::Tiny;
 use Getopt::Long qw(GetOptions);
 use File::Path   qw( make_path rmtree );
+use Cwd          qw(abs_path);
 
 # Load our modules
 use lib 'src';
@@ -172,7 +173,8 @@ if ( $architecture eq "unknown" ) {
 #############################################################
 # Start writing a summary file so the various packages can
 # reference that instead.
-my $summary = Config::Tiny->new();
+my $summary_file = abs_path("summary.conf");
+my $summary      = Config::Tiny->new();
 $summary->{"Install Paths"} = {
     install_path => $install_path,
     src_path     => $src_path,
@@ -188,7 +190,13 @@ $summary->{"deal.II"} = {
     version        => $config->{"deal.II"}->{version},
     build_examples => $config->{"deal.II"}->{build_examples}
 };
-$summary->write("summary.conf");
+$summary->{"General Configuration"} = {
+    packages => "null",
+    jobs     => $jobs,
+    os       => $os,
+    arch     => $architecture
+};
+$summary->write($summary_file);
 
 #############################################################
 # Package management
@@ -359,13 +367,8 @@ $summary->{"Compilers"} = {
     FC  => $ENV{FC_PATH},
     FF  => $ENV{FF_PATH}
 };
-$summary->{"General Configuration"} = {
-    packages => $packages,
-    jobs     => $jobs,
-    os       => $os,
-    arch     => $architecture
-};
-$summary->write("summary.conf");
+$summary->{"General Configuration"}->{packages} = $packages;
+$summary->write($summary_file);
 
 #############################################################
 # Begin installing the packages
