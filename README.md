@@ -8,7 +8,7 @@ Install common linux packages with
 ```
 sudo apt-get install lsb-release git subversion wget bc libgmp-dev \
 build-essential autoconf automake cmake libtool gfortran python3 \
-libboost-all-dev zlib1g-dev \
+ninja-build libboost-all-dev zlib1g-dev \
 openmpi-bin openmpi-common libopenmpi-dev \
 libblas3 libblas-dev liblapack3 liblapack-dev libsuitesparse-dev
 ```
