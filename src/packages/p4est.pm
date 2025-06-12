@@ -74,7 +74,9 @@ sub build {
     chdir("$NAME-$VERSION");
 
     # Configure the package
-    system("./configure --enable-mpi --prefix=$install_path/$NAME-$VERSION");
+    system(
+"./configure --enable-mpi --enable-shared --prefix=$install_path/$NAME-$VERSION"
+    );
 
     # Build the package
     system("make -j$jobs && make install");
