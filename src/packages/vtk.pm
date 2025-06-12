@@ -9,6 +9,7 @@ use archive_manager;
 use File::Path qw(rmtree);
 use File::Spec;
 use Cwd qw(abs_path);
+use signal_handler;
 
 our $PRIORITY = 13;
 
@@ -18,6 +19,9 @@ our $SOURCE_URL   = "https://vtk.org/files/release/9.4/";
 our $PACKING_TYPE = "tar.gz";
 our $CHECKSUM =
   "36c98e0da96bb12a30fe53708097aa9492e7b66d5c3b366e1c8dc251e2856a02";
+
+# Set up signal handlers
+signal_handler::setup_handlers();
 
 # Read the config file
 my $config_file = abs_path("summary.conf");

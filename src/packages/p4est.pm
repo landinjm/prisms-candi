@@ -9,6 +9,7 @@ use archive_manager;
 use File::Path qw(rmtree);
 use File::Spec;
 use Cwd qw(abs_path);
+use signal_handler;
 
 our $PRIORITY = 11;
 
@@ -18,6 +19,9 @@ our $SOURCE_URL   = "https://p4est.github.io/release/";
 our $PACKING_TYPE = "tar.gz";
 our $CHECKSUM =
   "0a1e912f3529999ca6d62fee335d51f24b5650b586e95a03ef39ebf73936d7f4";
+
+# Set up signal handlers
+signal_handler::setup_handlers();
 
 # Read the config file
 my $config_file = abs_path("summary.conf");

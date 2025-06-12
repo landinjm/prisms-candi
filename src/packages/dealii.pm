@@ -8,12 +8,16 @@ use utilities;
 use File::Path qw(rmtree);
 use File::Spec;
 use Cwd qw(abs_path);
+use signal_handler;
 
 our $PRIORITY = 100;
 
 our $VERSION    = "";
 our $NAME       = "dealii";
 our $SOURCE_URL = "https://github.com/dealii/dealii.git";
+
+# Set up signal handlers
+signal_handler::setup_handlers();
 
 # Read the config file
 my $config_file = abs_path("summary.conf");

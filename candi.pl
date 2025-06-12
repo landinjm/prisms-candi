@@ -11,6 +11,10 @@ use lib 'src';
 use utilities;
 use prisms_versioning_requirements;
 use package_manager;
+use signal_handler;
+
+# Set up signal handlers
+signal_handler::setup_handlers();
 
 #############################################################
 # Start a timer

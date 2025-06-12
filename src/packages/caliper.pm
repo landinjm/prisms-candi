@@ -9,6 +9,7 @@ use archive_manager;
 use File::Path qw(rmtree);
 use File::Spec;
 use Cwd qw(abs_path);
+use signal_handler;
 
 our $PRIORITY = 14;
 
@@ -18,6 +19,9 @@ our $SOURCE_URL   = "https://github.com/LLNL/Caliper/archive/refs/tags/v";
 our $PACKING_TYPE = "tar.gz";
 our $CHECKSUM =
   "2b5a8f98382c94dc75cc3f4517c758eaf9a3f9cea0a8dbdc7b38506060d6955c";
+
+# Set up signal handlers
+signal_handler::setup_handlers();
 
 # Read the config file
 my $config_file = abs_path("summary.conf");

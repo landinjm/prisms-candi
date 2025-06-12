@@ -9,6 +9,7 @@ use archive_manager;
 use File::Path qw(rmtree);
 use File::Spec;
 use Cwd qw(abs_path);
+use signal_handler;
 
 our $PRIORITY = 8;
 
@@ -18,6 +19,9 @@ our $SOURCE_URL   = "https://github.com/kokkos/kokkos/releases/download/";
 our $PACKING_TYPE = "tar.gz";
 our $CHECKSUM =
   "b9d70e4653b87a06dbb48d63291bf248058c7c7db4bd91979676ad5609bb1a3a";
+
+# Set up signal handlers
+signal_handler::setup_handlers();
 
 # Read the config file
 my $config_file = abs_path("summary.conf");
@@ -57,7 +61,7 @@ sub unpack {
     }
 
     # Unpack the archive
-    system("tar -xzf $NAME-$VERSION.$PACKING_TYPE -C $unpack_path");
+    system("set -m; tar -xzf $NAME-$VERSION.$PACKING_TYPE -C $unpack_path");
 }
 
 sub build {
@@ -71,11 +75,11 @@ sub build {
 
     # Run cmake
     system(
-"cmake -G Ninja -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
+"set -m; cmake -G Ninja -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
     );
 
     # Build
-    system("ninja -j$jobs && ninja install");
+    system("set -m; ninja -j$jobs && ninja install");
 }
 
 sub register {
