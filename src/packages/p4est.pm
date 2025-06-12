@@ -79,7 +79,7 @@ sub build {
     );
 
     # Build the package
-    system("make -j$jobs && make install");
+    system("make -C sc -j$jobs && make -j$jobs && make install");
 
 }
 
