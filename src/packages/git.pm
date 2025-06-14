@@ -54,23 +54,27 @@ sub unpack {
     }
 
     # Unpack the archive
-    system("tar -xzf $NAME-$VERSION.$PACKING_TYPE -C $unpack_path");
+    system("tar -xzf $NAME-$VERSION.$PACKING_TYPE -C $unpack_path") == 0
+      or die
+      "$0: tar -xzf $NAME-$VERSION.$PACKING_TYPE -C $unpack_path failed: $?\n";
 }
 
 sub build {
     my ( $unpack_path, $install_path ) = @_;
 
     # Copy the unpacked folder to the build path
-    system("cp -rf $unpack_path/$NAME-$VERSION .");
+    system("cp -rf $unpack_path/$NAME-$VERSION .") == 0
+      or die "$0: cp -rf $unpack_path/$NAME-$VERSION . failed: $?\n";
 
     # Navigate to the build folder
     chdir("$NAME-$VERSION");
 
     # Configure the package
-    system("./configure --prefix=$install_path/$NAME-$VERSION");
+    system("./configure --prefix=$install_path/$NAME-$VERSION") == 0
+      or die "$0: git configuration failed: $?\n";
 
     # Build the package
-    system("make install");
+    system("make install") == 0 or die "$0: git build failed: $?\n";
 }
 
 sub register {

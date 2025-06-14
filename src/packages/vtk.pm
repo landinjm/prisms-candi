@@ -61,7 +61,9 @@ sub unpack {
     }
 
     # Unpack the archive
-    system("tar -xzf $NAME-$VERSION.$PACKING_TYPE -C $unpack_path");
+    system("tar -xzf $NAME-$VERSION.$PACKING_TYPE -C $unpack_path") == 0
+      or die
+      "$0: tar -xzf $NAME-$VERSION.$PACKING_TYPE -C $unpack_path failed: $?\n";
 }
 
 sub build {
@@ -76,10 +78,11 @@ sub build {
     # Run cmake
     system(
 "cmake -G Ninja -DVTK_USE_MPI=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
-    );
+    ) == 0 or die "$0: vtk configuration failed: $?\n";
 
     # Build
-    system("ninja -j$jobs && ninja install");
+    system("ninja -j$jobs && ninja install") == 0
+      or die "$0: vtk build failed: $?\n";
 
 }
 

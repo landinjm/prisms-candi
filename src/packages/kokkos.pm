@@ -61,7 +61,9 @@ sub unpack {
     }
 
     # Unpack the archive
-    system("set -m; tar -xzf $NAME-$VERSION.$PACKING_TYPE -C $unpack_path");
+    system("set -m; tar -xzf $NAME-$VERSION.$PACKING_TYPE -C $unpack_path") == 0
+      or die
+      "$0: tar -xzf $NAME-$VERSION.$PACKING_TYPE -C $unpack_path failed: $?\n";
 }
 
 sub build {
@@ -76,10 +78,11 @@ sub build {
     # Run cmake
     system(
 "set -m; cmake -G Ninja -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
-    );
+    ) == 0 or die "$0: kokkos configuration failed: $?\n";
 
     # Build
-    system("set -m; ninja -j$jobs && ninja install");
+    system("set -m; ninja -j$jobs && ninja install") == 0
+      or die "$0: kokkos build failed: $?\n";
 }
 
 sub register {

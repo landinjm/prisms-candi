@@ -92,12 +92,11 @@ sub build {
     # Run cmake
     system(
 "cmake -G Ninja $conf_opts -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
-    );
-
-    exit 0;
+    ) == 0 or die "$0: dealii configuration failed: $?\n";
 
     # Build
-    system("ninja -j$jobs && ninja install");
+    system("ninja -j$jobs && ninja install") == 0
+      or die "$0: dealii build failed: $?\n";
 
 }
 
