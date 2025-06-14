@@ -77,7 +77,7 @@ sub build {
 
     # Run cmake
     system(
-"cmake -G Ninja -DVTK_USE_MPI=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
+"cmake -G Ninja -DVTK_USE_MPI=ON -DVTK_USE_COCOA=OFF -DVTK_USE_X=OFF -DVTK_OPENGL_USE_GLES=OFF -DVTK_OPENGL_HAS_EGL=OFF -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
     ) == 0 or die "$0: vtk configuration failed: $?\n";
 
     # Build
