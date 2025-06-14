@@ -50,13 +50,14 @@ sub fetch {
 
     # Clone the repository if it doesn't exist
     if ( !utilities::directory_exists("$NAME-$VERSION") ) {
-        system("git clone $SOURCE_URL $NAME-$VERSION");
+        system("git clone $SOURCE_URL $NAME-$VERSION") == 0
+          or die "$0: deal.II clone failed: $?\n";
     }
 
     # Checkout the version
     system(
 "cd $NAME-$VERSION && git fetch --all --tags --prune && git checkout tags/v$VERSION"
-    );
+    ) == 0 or die "$0: deal.II checkout failed: $?\n";
 }
 
 sub unpack {
@@ -75,7 +76,8 @@ sub unpack {
     }
 
     # Move the repository to the unpack path
-    system("mv $NAME-$VERSION $unpack_path");
+    system("mv $NAME-$VERSION $unpack_path") == 0
+      or die "$0: mv $NAME-$VERSION $unpack_path failed: $?\n";
 }
 
 sub build {

@@ -54,12 +54,15 @@ sub download_archive {
             # Download the archive
             print("Downloading $archive_url with $downloader\n");
             if ( $downloader eq "curl" ) {
-                system("curl -f -L -k -O $archive_url");
+                system("curl -f -L -k -O $archive_url") == 0
+                  or die "$0: curl -f -L -k -O $archive_url failed: $?\n";
             }
             elsif ( $downloader eq "wget" ) {
                 system(
-                    "wget --no-check-certificate $archive_url -O $archive_name"
-                );
+                    "wget --no-check-certificate $archive_url -O $archive_name")
+                  == 0
+                  or die
+"$0: wget --no-check-certificate $archive_url -O $archive_name failed: $?\n";
             }
             else {
                 utilities::color_print(
