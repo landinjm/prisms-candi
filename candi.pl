@@ -380,6 +380,12 @@ $summary->write($summary_file);
 #############################################################
 # Begin installing the packages
 
+# Delete the previous environment file
+if ( utilities::file_exists("$install_path/prisms_env.sh") ) {
+    unlink "$install_path/prisms_env.sh"
+      or die "Cannot delete $install_path/prisms_env.sh";
+}
+
 # Initialize the package manager
 package_manager::init( $src_path, $unpack_path, $build_path, $install_path );
 for my $pkg (@packages_to_install) {

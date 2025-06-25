@@ -97,13 +97,14 @@ sub build {
     # Build
     system("ninja -j$jobs && ninja install") == 0
       or die "$0: caliper build failed: $?\n";
+
 }
 
 sub register {
     my $install_path = shift;
 
     # Add to path
-    my $new_path = "$install_path/$NAME-$VERSION/bin";
+    my $new_path = "$install_path/$NAME-$VERSION";
     $ENV{PATH} = "$new_path:$ENV{PATH}";
 
     my $config = Config::Tiny->read($config_file);
@@ -124,7 +125,7 @@ sub register {
     my $config_file = File::Spec->catfile( $install_path, 'prisms_env.sh' );
     open( my $fh, '>>', $config_file )
       or die "Cannot append to $config_file: $!";
-    print $fh "export CALIPER_DIR=$new_path\n";
+    print $fh "export CALIPER_DIR=$new_path/bin\n";
     close($fh);
 }
 

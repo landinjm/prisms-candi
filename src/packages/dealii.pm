@@ -34,7 +34,7 @@ our $jobs = $config->{"General Configuration"}->{jobs};
 # Determine some configuration options
 $VERSION = $config->{'deal.II'}->{version};
 our $conf_opts =
-qq{-DDEAL_II_WITH_MPI=ON -DDEAL_II_WITH_P4EST=ON -DDEAL_II_WITH_ZLIB=ON -DDEAL_II_WITH_TBB=ON};
+qq{-DDEAL_II_WITH_MPI=ON -DDEAL_II_WITH_P4EST=ON -DDEAL_II_WITH_ZLIB=ON -DDEAL_II_WITH_VTK=ON -DDEAL_II_WITH_TBB=ON};
 if ( $config->{"General Configuration"}->{dev_mode} eq "ON" ) {
     $conf_opts .= qq{ -DDEAL_II_ALLOW_AUTODETECTION=OFF};
 }
@@ -84,6 +84,20 @@ sub unpack {
 sub build {
     my ( $unpack_path, $install_path ) = @_;
 
+    # Read the summary file
+    my $summary = Config::Tiny->read($config_file);
+    if ( !$summary ) {
+        utilities::color_print(
+            "Error: Failed to read summary file: " . Config::Tiny->errstr(),
+            "bad" );
+        exit 1;
+    }
+
+    # Grab the install directories for the dependencies
+    my $kokkos_dir = $summary->{"kokkos"}->{install_dir};
+    my $p4est_dir  = $summary->{"p4est"}->{install_dir};
+    my $vtk_dir    = $summary->{"vtk"}->{vtk_dir};
+
     # Create the build folder
     mkdir("$NAME-$VERSION");
 
@@ -92,7 +106,7 @@ sub build {
 
     # Run cmake
     system(
-"cmake -G Ninja $conf_opts -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
+"cmake -G Ninja $conf_opts -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION -DKOKKOS_DIR=$kokkos_dir -DP4EST_DIR=$p4est_dir -DVTK_DIR=$vtk_dir $unpack_path/$NAME-$VERSION"
     ) == 0 or die "$0: dealii configuration failed: $?\n";
 
     # Build
@@ -105,7 +119,7 @@ sub register {
     my $install_path = shift;
 
     # Add to path
-    my $new_path = "$install_path/$NAME-$VERSION/bin";
+    my $new_path = "$install_path/$NAME-$VERSION";
     $ENV{PATH} = "$new_path:$ENV{PATH}";
 
     my $config = Config::Tiny->read($config_file);
@@ -126,7 +140,7 @@ sub register {
     my $config_file = File::Spec->catfile( $install_path, 'prisms_env.sh' );
     open( my $fh, '>>', $config_file )
       or die "Cannot append to $config_file: $!";
-    print $fh "export DEAL_II_DIR=$new_path\n";
+    print $fh "export DEAL_II_DIR=$new_path/bin\n";
     close($fh);
 }
 
