@@ -34,7 +34,7 @@ our $jobs = $config->{"General Configuration"}->{jobs};
 # Determine some configuration options
 $VERSION = $config->{'deal.II'}->{version};
 our $conf_opts =
-qq{-DDEAL_II_WITH_MPI=ON -DDEAL_II_WITH_P4EST=ON -DDEAL_II_WITH_ZLIB=ON -DDEAL_II_WITH_VTK=ON -DDEAL_II_WITH_TBB=ON};
+qq{-DDEAL_II_WITH_MPI=ON -DDEAL_II_WITH_P4EST=ON -DDEAL_II_WITH_LAPACK=ON -DDEAL_II_WITH_ZLIB=ON -DDEAL_II_WITH_VTK=ON -DDEAL_II_WITH_TBB=ON};
 if ( $config->{"General Configuration"}->{dev_mode} eq "ON" ) {
     $conf_opts .= qq{ -DDEAL_II_ALLOW_AUTODETECTION=OFF};
 }
