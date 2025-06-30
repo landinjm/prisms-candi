@@ -91,7 +91,7 @@ sub build {
 
     # Run cmake
     system(
-"cmake -G Ninja -DWITH_MPI=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
+"cmake -G Ninja -DBUILD_SHARED_LIBS=OFF -DWITH_MPI=ON -DCMAKE_INSTALL_PREFIX=$install_path/$NAME-$VERSION $unpack_path/$NAME-$VERSION"
     ) == 0 or die "$0: caliper configuration failed: $?\n";
 
     # Build
