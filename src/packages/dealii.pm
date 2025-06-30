@@ -140,7 +140,7 @@ sub register {
     my $config_file = File::Spec->catfile( $install_path, 'prisms_env.sh' );
     open( my $fh, '>>', $config_file )
       or die "Cannot append to $config_file: $!";
-    print $fh "export DEAL_II_DIR=$new_path/bin\n";
+    print $fh "export DEAL_II_DIR=$new_path\n";
     close($fh);
 }
 
